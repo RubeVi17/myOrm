@@ -1,0 +1,7 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__.'/Core/Console/Application.php';
+
+$app = new Application();
+$app->run($argv);
