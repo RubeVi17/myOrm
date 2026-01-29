@@ -7,6 +7,7 @@ class ColumnDefinition
     public string $type;
     public array $modifiers = [];
     public array $foreign = [];
+    protected ?string $after = null;
     
 
     public function __construct(string $name, string $type)
@@ -15,6 +16,16 @@ class ColumnDefinition
         $this->type = $type;
     }
 
+    public function getAfter(): ?string
+    {
+        return $this->after;
+    }
+
+    public function after(string $column)
+    {
+        $this->after = $column;
+        return $this;
+    }
 
     public function nullable()
     {
@@ -30,7 +41,17 @@ class ColumnDefinition
 
     public function default($value)
     {
-        $this->modifiers[] = "DEFAULT '{$value}'";
+        if(is_bool($value)){
+            $value = $value ? 'TRUE' : 'FALSE';
+        } elseif (is_null($value)) {
+            $value = 'NULL';
+        } elseif (is_numeric($value)) {
+            // leave as is
+        } else {
+            $value = "'{$value}'";
+        }
+
+        $this->modifiers[] = "DEFAULT {$value}";
         return $this;
     }
 
@@ -63,12 +84,31 @@ class ColumnDefinition
     {
         $sql = "{$this->name} {$this->type}";
 
-        if (!in_array('NULL', $this->modifiers)) {
+        // 1) Type modifiers (van inmediatamente después del tipo)
+        $typeMods = [];
+        $otherMods = [];
+
+        foreach ($this->modifiers as $m) {
+            $u = strtoupper(trim($m));
+            if ($u === 'UNSIGNED' || $u === 'ZEROFILL') {
+                $typeMods[] = $u;
+            } else {
+                $otherMods[] = $m;
+            }
+        }
+
+        if ($typeMods) {
+            $sql .= " " . implode(" ", $typeMods);
+        }
+
+        // 2) Nullability
+        if (!in_array('NULL', $this->modifiers, true)) {
             $sql .= " NOT NULL";
         }
 
-        if ($this->modifiers) {
-            $sql .= " " . implode(" ", $this->modifiers);
+        // 3) Resto de modifiers (DEFAULT, UNIQUE, etc.)
+        if ($otherMods) {
+            $sql .= " " . implode(" ", $otherMods);
         }
 
         return $sql;

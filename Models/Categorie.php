@@ -1,26 +1,14 @@
 <?php
 
 require_once __DIR__.'/../Core/Model.php';
-require_once __DIR__.'/Post.php';
 require_once __DIR__.'/Topic.php';
-
-
-class User extends Model
+class Categorie extends Model
 {
-    protected static string $table = 'users';
+    protected static string $table = 'categories';
 
     protected array $fillable = [
         'name',
-        'email',
-        'age',
-        'phone'
     ];
-
-
-    public function posts()
-    {
-        return $this->hasMany(Post::class);
-    }
 
     public function topics()
     {
@@ -30,8 +18,12 @@ class User extends Model
     public static function relations(): array
     {
         return [
-            'posts' => 'hasMany',
             'topics' => 'hasMany',
         ];
+    }
+
+    public static function getTableName(): string
+    {
+        return self::$table;
     }
 }

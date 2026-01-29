@@ -10,6 +10,7 @@ $executed = $pdo->query("SELECT migration FROM migrations")->fetchAll(PDO::FETCH
 
 $files = glob(__DIR__ . '/Migrations/*.php');
 $batch = count($executed) + 1;
+$migrations = [];
 
 foreach($files as $file){
 
@@ -28,7 +29,15 @@ foreach($files as $file){
         "INSERT INTO migrations (migration, batch) VALUES (:migration, :batch)"
     );
     $stmt->execute([':migration' => $name, ':batch' => $batch]);
+    $migrations[] = $name;
 
 }
 
-echo "Migraciones completadas.\n";
+if(empty($migrations)){
+    echo "No hay migraciones pendientes.\n";
+} else {
+    echo "Migraciones ejecutadas:\n";
+    foreach($migrations as $migration){
+        echo "- {$migration}, \n";
+    }
+}
