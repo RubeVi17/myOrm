@@ -4,6 +4,7 @@ require_once __DIR__.'/../Core/Model.php';
 require_once __DIR__.'/User.php';
 require_once __DIR__.'/Categorie.php';
 require_once __DIR__.'/TopicComments.php';
+require_once __DIR__.'/TopicLike.php';
 
 class Topic extends Model
 {
@@ -33,12 +34,18 @@ class Topic extends Model
         return $this->hasMany(TopicComments::class, 'topic_id');
     }
 
+    public function likes()
+    {
+        return $this->hasMany(TopicLike::class, 'topic_id');
+    }
+
     public static function relations(): array
     {
         return [
             'user' => 'belongsTo',
             'categorie' => 'belongsTo',
             'comments' => 'hasMany',
+            'likes' => 'hasMany',
         ];
     }
 }

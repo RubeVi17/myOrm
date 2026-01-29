@@ -22,23 +22,53 @@ if($selectedModel){
 
     $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
+$builder = null;
 $responseSql = null;
-if ($_POST && isset($_POST['model'], $_POST['data'])) {
-    $data = $_POST['data'];
+$record = null;
+if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
-    $response = $selectedModel::create($data);
-    $response = $response->toArray();
+
+    if($_POST["form_id"] == "search"){
+        if (
+            isset($_POST['column'], $_POST['value']) &&
+            $_POST['column'] !== '' &&
+            $_POST['value'] !== ''
+        ) {
+            $column = $_POST['column'];
+            $value = $_POST['value'];
+            $operator = $_POST['operator'] ?? '=';
+
+            $builder = $selectedModel::where($column, $operator, $value);
+
+            $record = $builder->first();
+
+        }
+    }
+
+    if($_POST["form_id"] == "update"){
+        if (
+            isset($_POST['data']) &&
+            !empty($_POST['data'])
+        ) {
+            $data = $_POST['data'];
+            //var_dump($data);
+            $record = $selectedModel::find($data['id']);
+            $response = $record->update($data);
+            if($response){
+                $record = $selectedModel::find($data['id']);
+                $response = $record->toArray();
+            }
+        }
+    }
 
 }
-
 require 'layout.php';
 ?>
 
-<h2>Crear Registro</h2>
+<h2>Actualizar Registro</h2>
 
 <div class="row">
-    <div class="col-6">
+    <div class="col-4">
         <form method="get" action="">
             <div class="form-group">
                 <label>Seleccionar Modelo:</label>
@@ -53,10 +83,59 @@ require 'layout.php';
             </div>
         </form>
     </div>
+    <?php
+    if ($selectedModel && !empty($columns)):
+    ?>
+    <div class="col-8">
+        <form method="post">
+            <div class="form-row">
+                <div class="col-3">
+                    <div class="form-group">
+                        <label>Buscar por:</label>
+                        <select name="column">
+                            <option value="id">ID</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="form-group">
+                        <label>Operador:</label>
+                        <select name="operator">
+                            <option value="=">=</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label>Valor:</label>
+                        <input type="text" name="value" placeholder="Valor a buscar">
+                        <input type="hidden" name="model" value="<?php echo $selectedModel; ?>">
+                        <input type="hidden" name="form_id" value="search">
+                    </div>
+                </div>
+            </div>
+            <button type="submit">Buscar</button>
+            <div class="form-group">
+                <small>Consulta SQL Generada:</small>
+                <code>
+                    <?php
+                    if ($builder) {
+                        echo htmlspecialchars($builder->sqlDebug());
+                    } else {
+                        echo 'SELECT * FROM ' . $selectedModel . 's WHERE 1';
+                    }
+                    ?>
+                </code>
+            </div>
+        </form>
+    </div>
+    <?php
+    endif;
+    ?>
 </div>
 
 <?php
-if ($selectedModel && !empty($columns)):
+if ($selectedModel && !empty($columns) && isset($record)):
 
     $fks = $selectedModel::foreignKeys();
 
@@ -68,7 +147,12 @@ if ($selectedModel && !empty($columns)):
             $inputType = 'text';
         } elseif (strpos($column['Type'], 'date') !== false) {
             $inputType = 'date';
-        } else {
+        } elseif (strpos($column['Type'], 'datetime') !== false) {
+            $inputType = 'datetime-local';
+        } elseif (strpos($column['Type'], 'text') !== false) {
+            $inputType = 'textarea';
+        }
+        else {
             $inputType = 'text';
         }
     endforeach;
@@ -78,9 +162,11 @@ if ($selectedModel && !empty($columns)):
 <div class="row">
     <div class="col-8">
         <div class="card">
-            <h3>Crear nuevo <?php echo $selectedModel; ?></h3>
+            <h3>Actualizar <?php echo $selectedModel; ?></h3>
             <form method="post">
                 <input type="hidden" name="model" value="<?php echo $selectedModel; ?>">
+                <input type="hidden" name="form_id" value="update">
+                <input type="hidden" name="data[id]" value="<?php echo $record->id; ?>">
                 <?php foreach ($columns as $column): 
                     if(isset($fks[$column['Field']])){
                         $refTable = $fks[$column['Field']]['table'];
@@ -93,7 +179,11 @@ if ($selectedModel && !empty($columns)):
                         <select name="data[<?= $column['Field'] ?>]" <?= $column['Null'] === 'NO' ? 'required' : '' ?>>
                             <option value="">-- Seleccionar --</option>
                             <?php foreach ($options as $opt) {
-                                echo "<option value='{$opt['id']}'>{$opt['id']} : {$opt['name']}</option>";
+                            ?>
+                                <option value='<?php echo $opt['id']; ?>' <?php if ($record->{$column['Field']} == $opt['id']) echo 'selected'; ?>>
+                                    <?php echo $opt['id'] . ' : ' . ($opt['name'] ?? ''); ?>
+                                </option>
+                            <?php
                             } ?>
                         </select>
                     </div>
@@ -107,7 +197,7 @@ if ($selectedModel && !empty($columns)):
                         name="data[<?= $column['Field'] ?>]"
                         placeholder="<?= $column['Type'] ?>"
                         cols="30" rows="5"
-                        <?= $column['Null'] === 'NO' ? 'required' : '' ?>></textarea>
+                        <?= $column['Null'] === 'NO' ? 'required' : '' ?>><?php echo htmlspecialchars($record->{$column['Field']}); ?></textarea>
                     </div>
                     <?php
                     }else{
@@ -119,15 +209,11 @@ if ($selectedModel && !empty($columns)):
                         type="<?= $inputType ?>"
                         name="data[<?= $column['Field'] ?>]"
                         placeholder="<?= $column['Type'] ?>"
-                        <?php if ($column['Default'] !== null && $column['Default'] !== 'CURRENT_TIMESTAMP'): ?>
-                            value="<?= htmlspecialchars($column['Default']) ?>"
-                        <?php elseif ($column['Type'] == 'timestamp'): ?>
-                            value="<?= date('Y-m-d H:i:s') ?>"
-                        <?php endif; ?>
+                        value="<?php echo htmlspecialchars($record->{$column['Field']}); ?>"
                         <?= $column['Null'] === 'NO' ? 'required' : '' ?>>
                     </div>
                 <?php } endforeach; ?>
-                <button type="submit">Crear</button>
+                <button type="submit">Actualizar</button>
             </form>
         </div>
     </div>

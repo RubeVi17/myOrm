@@ -44,10 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $value = $_POST['value'];
             $operator = $_POST['operator'] ?? '=';
 
-            // 👉 Builder
             $builder = $selectedModel::where($column, $operator, $value);
 
-            // 👉 Ejecutar después
             $records = $builder->get();
 
             // Incluir relaciones
@@ -62,8 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
         } elseif (isset($_POST['model'])) {
-            // 👉 all() NO sirve para debug SQL
-            // Simulamos "all" con Builder
             $builder = $selectedModel::query();
             $records = $builder->get();
         }
@@ -110,26 +106,44 @@ require 'layout.php';
     ?>
     <div class="col-8">
         <form method="post">
-            <div class="form-group">
-                <label>Buscar por:</label>
-                <select name="column">
-                    <?php foreach ($columns as $column): ?>
-                        <option value="<?php echo $column['Field']; ?>"><?php echo $column['Field']; ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <select name="operator">
-                    <option value="=">=</option>
-                    <option value="!=">!=</option>
-                    <option value="<"><</option>
-                    <option value=">">></option>
-                    <option value="<="><=</option>
-                    <option value=">=">>=</option>
-                </select>
-                <input type="text" name="value" placeholder="Valor a buscar">
-                <input type="hidden" name="model" value="<?php echo $selectedModel; ?>">
-                <input type="hidden" name="form_id" value="search">
-                <button type="submit">Buscar</button>
+            <div class="form-row">
+                <div class="col-3">
+                    <div class="form-group">
+                        <label>Buscar por:</label>
+                        <select name="column">
+                            <?php foreach ($columns as $column): ?>
+                                <option value="<?php echo $column['Field']; ?>"><?php echo $column['Field']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="form-group">
+                        <label>Operador:</label>
+                        <select name="operator">
+                            <option value="=">=</option>
+                            <option value="!=">!=</option>
+                            <option value="<"><</option>
+                            <option value=">">></option>
+                            <option value="<="><=</option>
+                            <option value=">=">>=</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label>Valor:</label>
+                        <input type="text" name="value" placeholder="Valor a buscar">
+                        <input type="hidden" name="model" value="<?php echo $selectedModel; ?>">
+                        <input type="hidden" name="form_id" value="search">
+                    </div>
+                </div>
             </div>
+            <div class="form-row">                
+                <div class="col-1">
+                    <button type="submit">Buscar Registros</button>
+                </div>
+            </div>        
             <div class="form-group">
                 <label>Relaciones:</label>
                 <select name="relation">

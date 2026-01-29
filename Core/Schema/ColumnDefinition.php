@@ -8,6 +8,8 @@ class ColumnDefinition
     public array $modifiers = [];
     public array $foreign = [];
     protected ?string $after = null;
+    public ?string $onDelete = null;
+    public ?string $onUpdate = null;
     
 
     public function __construct(string $name, string $type)
@@ -77,7 +79,24 @@ class ColumnDefinition
 
     public function constrained(string $table, $column = 'id')
     {
-        return $this->references($column)->on($table);
+        $this->foreign = [
+            'on' => $table,
+            'references' => $column,
+        ];
+
+        return $this;
+    }
+
+    public function onDelete(string $action): self
+    {
+        $this->onDelete = strtoupper($action);
+        return $this;
+    }
+
+    public function onUpdate(string $action): self
+    {
+        $this->onUpdate = strtoupper($action);
+        return $this;
     }
 
     public function toSql(): string

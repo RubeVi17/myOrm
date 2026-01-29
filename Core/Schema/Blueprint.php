@@ -133,9 +133,18 @@ class Blueprint
             // Foreign keys
             foreach ($this->foreignKeys as $column) {
                 if (!empty($column->foreign)) {
-                    $definitions[] =
-                        "FOREIGN KEY ({$column->name})
-                        REFERENCES {$column->foreign['on']}({$column->foreign['references']})";
+                    $fkSql = "FOREIGN KEY ({$column->name})
+                            REFERENCES {$column->foreign['on']}({$column->foreign['references']})";
+
+                    if (!empty($column->onDelete)) {
+                        $fkSql .= " ON DELETE {$column->onDelete}";
+                    }
+
+                    if (!empty($column->onUpdate)) {
+                        $fkSql .= " ON UPDATE {$column->onUpdate}";
+                    }
+
+                    $definitions[] = $fkSql;
                 }
             }
 
@@ -161,10 +170,19 @@ class Blueprint
 
         foreach ($this->foreignKeys as $column) {
             if (!empty($column->foreign)) {
-                $statements[] =
-                    "ALTER TABLE {$this->table}
-                    ADD FOREIGN KEY ({$column->name})
-                    REFERENCES {$column->foreign['on']}({$column->foreign['references']})";
+                $sql = "ALTER TABLE {$this->table}
+                        ADD FOREIGN KEY ({$column->name})
+                        REFERENCES {$column->foreign['on']}({$column->foreign['references']})";
+
+                if (!empty($column->onDelete)) {
+                    $sql .= " ON DELETE {$column->onDelete}";
+                }
+
+                if (!empty($column->onUpdate)) {
+                    $sql .= " ON UPDATE {$column->onUpdate}";
+                }
+
+                $statements[] = $sql;
             }
         }
 
