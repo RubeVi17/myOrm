@@ -8,7 +8,7 @@ class Database
     {
         if (!self::$pdo) {
             self::$pdo = new PDO(
-                "mysql:host=localhost;dbname=orm-test;charset=utf8",
+                "mysql:host=localhost;dbname=orm-test;charset=utf8mb4",
                 "root",
                 "",
                 [

@@ -5,6 +5,7 @@
     <title>ORM Lab</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
         * {
@@ -747,7 +748,6 @@
             margin-top: 5px;
             font-size: 14px;
             color: #555;
-            white-space: pre-line;
             word-wrap: break-word;
             overflow-wrap: break-word;  
             word-break: break-word;    
@@ -831,6 +831,188 @@
 
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-muted);
+        }
+
+        /* ============================================ */
+        /* MARKDOWN CONTENT - OVERRIDES ESPECÍFICOS   */
+        /* ============================================ */
+
+        /* Code inline - Aumentar especificidad */
+        .card .card-body .markdown-content code,
+        .markdown-content code {
+            background: #f6f8fa;
+            color: #e83e8c;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            display: inline;
+            border: 1px solid #e1e4e8;
+            margin: 0 2px;
+        }
+
+        /* Pre blocks - bloques de código */
+        .card .card-body .markdown-content pre,
+        .markdown-content pre {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Code dentro de pre - fondo oscuro */
+        .card .card-body .markdown-content pre code,
+        .markdown-content pre code {
+            background: transparent;
+            color: #f8f8f2;
+            padding: 0;
+            display: block;
+            border: none;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* Títulos en markdown */
+        .markdown-content h1 {
+            font-size: 32px;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            color: var(--text-dark);
+            text-shadow: none;
+        }
+
+        .markdown-content h2 {
+            font-size: 26px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+            text-shadow: none;
+        }
+
+        .markdown-content h3 {
+            font-size: 20px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+            text-shadow: none;
+        }
+
+        /* Párrafos */
+        .markdown-content p {
+            margin-bottom: 16px;
+            color: var(--text-dark);
+            line-height: 1.8;
+        }
+
+        /* Listas en markdown - sin estilos de card */
+        .markdown-content ul,
+        .markdown-content ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+            padding: 0;
+            background: transparent;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        .markdown-content li {
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        /* Blockquotes */
+        .markdown-content blockquote {
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            margin: 16px 0;
+            color: var(--text-muted);
+            font-style: italic;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        /* Links */
+        .markdown-content a {
+            color: var(--primary);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s ease;
+        }
+
+        .markdown-content a:hover {
+            border-bottom-color: var(--primary);
+        }
+
+        /* Tablas */
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .markdown-content table th,
+        .markdown-content table td {
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .markdown-content table th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .markdown-content table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Imágenes */
+        .markdown-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* HR */
+        .markdown-content hr {
+            border: none;
+            border-top: 2px solid var(--border);
+            margin: 32px 0;
+        }
+
+        /* Strong y Em */
+        .markdown-content strong {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .markdown-content em {
+            font-style: italic;
+        }
+
+        /* ULTRA ESPECÍFICO - solo si lo anterior no funciona */
+        body .container .card .card-body .markdown-content code {
+            background: #f6f8fa !important;
+            color: #e83e8c !important;
+        }
+
+        body .container .card .card-body .markdown-content pre {
+            background: #2d2d2d !important;
+        }
+
+        body .container .card .card-body .markdown-content pre code {
+            background: transparent !important;
+            color: #f8f8f2 !important;
         }
 
     </style>

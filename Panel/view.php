@@ -14,7 +14,12 @@ $topic->loadMany([
 
 require 'layout.php';
 ?>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
 <div class="row mb-3">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center">
@@ -69,9 +74,11 @@ require 'layout.php';
                 </div>
 
                 <!-- DESCRIPCIÓN -->
-                <div class="form-group">
-                    <label><i class="fas fa-align-left"></i> Descripción</label>
-                    <textarea disabled rows="6"><?= htmlspecialchars($topic->description) ?></textarea>
+                <div class="card mb-2" style="background: #f8f9fa;">
+                    <div class="card-body" style="padding: 16px;">
+                        <div class="comment-content"><div id="markdown-rendered"></div></div>
+                        <div id="markdown-source" style="display:none;"><?= htmlspecialchars($topic->description) ?></div>
+                    </div>
                 </div>
 
                 <!-- ESTADÍSTICAS -->
@@ -123,7 +130,7 @@ require 'layout.php';
                                         </div>
                                     </div>
                                     <small style="color: var(--text-muted);">
-                                        <i class="fas fa-clock"></i> <?= date('d/m/Y h:i A', strtotime($comment->created_at)) ?>
+                                        <i class="fas fa-clock"></i><?= date('d/m/Y h:i A', strtotime($comment->created_at)) ?>
                                     </small>
                                 </div>
                                 <div class="comment-content"><?= nl2br(htmlspecialchars($comment->comment)) ?></div>
@@ -143,7 +150,7 @@ require 'layout.php';
                 <h3><i class="fas fa-heart"></i> Likes (<?= count($topic->likes) ?>)</h3>
             </div>
             <div class="card-body">
-                <?php if (empty($topic->likes)): ?>
+                <?php if (empty($topic->likes())): ?>
                     <p class="text-center" style="color: var(--text-muted); padding: 20px 0;">
                         <i class="fas fa-heart-broken" style="font-size: 48px; opacity: 0.3;"></i>
                         <br><br>
@@ -213,4 +220,16 @@ require 'layout.php';
 
 </div>
 </body>
+<script>
+// Convertir Markdown a HTML
+const markdownSource = document.getElementById('markdown-source').textContent;
+const htmlContent = marked.parse(markdownSource);
+document.getElementById('markdown-rendered').innerHTML = htmlContent;
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    document.querySelectorAll('.markdown-content pre code').forEach((block) => {
+        hljs.highlightElement(block);
+    });
+});
+</script>
 </html>
